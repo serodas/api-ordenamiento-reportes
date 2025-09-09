@@ -1,0 +1,8 @@
+services:
+  get_ord_api:
+    build: .
+    container_name: get_ord_api
+    volumes:
+      - .:/app
+    env_file:
+      - .env
