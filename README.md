@@ -1,46 +1,34 @@
-# 📂 CSV Reader & File Downloader (Paramiko + Docker)
+# 📄 HISCLI Batch Reporter
 
-Este proyecto permite descargar archivos desde un servidor remoto **via SSH/SFTP** a partir de un archivo **CSV** que contiene la información de las facturas y documentos asociados.  
-Los archivos se organizan en carpetas locales según el número de factura y conservan la extensión original.
-
----
-
-## ⚙️ Requisitos
-
-- Python 3.9+
-- Docker y Docker Compose
-
-Dependencias Python:
-- `paramiko`
-- `python-dotenv`
+Este proyecto permite procesar un archivo CSV con códigos `mrcodcons`, consultar la API de **HISCLI**, descargar los PDFs resultantes y generar un reporte en formato CSV con el estado de cada consulta.
 
 ---
 
-## 📑 Estructura del CSV
+## 🚀 Funcionalidad
 
-El archivo CSV debe tener las siguientes columnas obligatorias:
+- Lee un archivo CSV de entrada (`data.csv`) con una columna llamada `mrcodcons`.
+- Envía solicitudes **POST** en lotes (batching) de 10 en 10 hacia la API: https://hiscli.comfamiliar.com:8888/api/v1/reporte/ordenamiento
+- Guarda los **PDFs** en la carpeta `downloads/`.
+- Genera un archivo `resultado.csv` con tres columnas:
+- `mrcodcons`
+- `mensaje` → `OK` o `ERROR`
+- `observacion` → detalle del éxito o error.
+- Entre cada batch se aplica un **delay de 4 segundos** para no saturar la API.
 
-| Columna           | Descripción                          |
-|-------------------|--------------------------------------|
-| `BECODBENE`       | Código del beneficiario              |
-| `NOMBRE_DOCUMENTO`| Nombre del archivo en el servidor    |
-| `FACTURA`         | Número de la factura asociada        |
+---
 
-Ejemplo `facturas.csv`:
+## 📂 Estructura de salida
+
+- `downloads/` → carpeta con todos los PDFs descargados.
+- `resultado.csv` → archivo de resumen con estado de cada código.
+
+Ejemplo de `resultado.csv`:
 
 ```csv
-BECODBENE,NOMBRE_DOCUMENTO,FACTURA
-123,documento1.pdf,INV001
-123,documento2.xml,INV001
-456,archivo3.pdf,INV002
-```
-
-## 🔧 Configuración
-El proyecto incluye un archivo .env.local de ejemplo.
-
-Cópialo como .env antes de ejecutar:
-```bash
-cp .env.local .env
+mrcodcons,mensaje,observacion
+56794062,ERROR,HTTP 500. Respuesta: ...
+56790671,ERROR,Error de conexión: Expecting value...
+56828352,OK,PDF guardado correctamente en downloads/56828352.pdf
 ```
 
 ## 🚀 Uso
